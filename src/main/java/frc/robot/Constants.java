@@ -12,31 +12,30 @@ public class Constants {
     }
 
     public static class motorPorts {
-        public static final int frontElevatorMotor = 0;
-        public static final int backElevatorMotor = 0;
+        public static final int frontElevatorMotor = 11;
+        public static final int backElevatorMotor = 12;
 
-        public static final int indexMotor = 0;
-        public static final int photoEye = 0;
+        public static final int indexMotor = 21;
+        public static final int photoEye = 19;
 
-        public static final int pivotMotor = 0;
+        public static final int pivotMotor = 20;
     }   
 
     public static class elevatorConstants {
         //PID Values
-        public static final double p = 0.8;
+        public static final double p = 1;
         public static final double i = 0.0;
-        public static final double d = 0.1;
+        public static final double d = 0;
 
         //Elevator encoder positions
-        //FIXME
-        public static final int intake = 0;
-        public static final int levelTwo = 0;
-        public static final int levelThree = 0;
-        public static final int levelFour = 0;
+        public static final double intake = 0;
+        public static final double levelTwo = 4.315;
+        public static final double levelThree = 10.315;
+        public static final double levelFour = 21.4;
 
         public static final int currentLimit = 40;
         
-        public static final int elevatorTolerance = 5; //5 ticks should be pretty small I think
+        public static final double elevatorTolerance = 0.4; //5 ticks should be pretty small I think
 
         public static enum ElevatorHeight {
             INTAKE,
@@ -48,14 +47,14 @@ public class Constants {
 
     public static class pivotConstants {
         //PID Values
-        public static final double p = 0.8;
-        public static final double i = 0.0;
+        public static final double p = 1.2;
+        public static final double i = 0.2;
         public static final double d = 0.1;
 
-        public static final int algae = 0;
-        public static final int coralscore = 0;
-        public static final int coralintake = 0;
-        public static final int climb = 0;
+        public static final double algae = 0.027;
+        public static final double coralscore = 0.425;
+        public static final double coralintake = 0.516;
+        public static final double climb = 0;
 
         public static final int currentLimit = 40;
 
@@ -70,7 +69,7 @@ public class Constants {
     public class indexConstants {
         public static final double indexSpeed = 0.3;
         public static final int currentLimit = 40;
-        public static final int distanceTolerance = 5;
+        public static final double distanceTolerance = 0.1;
     }
 
     public static final class OIConstants {
@@ -116,6 +115,7 @@ public class Constants {
     public static final int kFrontRightTurningCanId = 6;
     public static final int kRearRightTurningCanId = 5;
 
+    public static final int kPigeonCanId = 18;
     public static final boolean kGyroReversed = false;
   }
 

@@ -11,6 +11,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.motorPorts;
 import frc.robot.Constants.pivotConstants;
@@ -18,37 +19,39 @@ import frc.robot.Constants.pivotConstants.PivotPosition;
 
 public class Pivot extends SubsystemBase {
 
-  int pivotPosition;
+  double pivotPosition;
   SparkMax pivotMotor;
   PIDController pivotPID;
-  PivotPosition position;
+  PivotPosition Sposition;
   
   public Pivot() {
     pivotMotor = new SparkMax(motorPorts.pivotMotor, MotorType.kBrushless);
     SparkMaxConfig config = new SparkMaxConfig();
     config.smartCurrentLimit(pivotConstants.currentLimit);
+    config.inverted(true);
     pivotMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     
     pivotPID = new PIDController(pivotConstants.p, pivotConstants.i, pivotConstants.d);
+    switchPivot(PivotPosition.CORALINTAKE);
   }
 
   public void switchPivot(PivotPosition position){
-    this.position = position;
+    Sposition = position;
     switch(position){
       case ALGAE:
         pivotPosition = pivotConstants.algae;
         break;
 
       case CORALSCORE:
-        pivotPosition = pivotConstants.coralintake;
+        pivotPosition = pivotConstants.coralscore;
         break;
-
+        
       case CLIMB:
         pivotPosition = pivotConstants.climb;
         break;
       
       case CORALINTAKE:
-        pivotPosition = pivotConstants.coralscore;
+        pivotPosition = pivotConstants.coralintake;
         break;
 
       default:
@@ -57,11 +60,12 @@ public class Pivot extends SubsystemBase {
   }
 
   public PivotPosition getPosition(){
-    return position;
+    return Sposition;
   }
 
   @Override
   public void periodic() {
     pivotMotor.set(pivotPID.calculate(pivotMotor.getAbsoluteEncoder().getPosition(), pivotPosition));
+    SmartDashboard.putString("PivotPosition", getPosition().toString());
   }
 }

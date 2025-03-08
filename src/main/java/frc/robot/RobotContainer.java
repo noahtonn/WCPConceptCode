@@ -4,8 +4,11 @@
 
 package frc.robot;
 
+import java.time.Instant;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -15,6 +18,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Commands.IntakeCoral;
 import frc.robot.Commands.OuttakeCoral;
+import frc.robot.Commands.moveElevator;
+import frc.robot.Commands.safeElevator;
+import frc.robot.Commands.switchCoralIntake;
+import frc.robot.Commands.switchPivot;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.controllerPorts;
 import frc.robot.Constants.elevatorConstants.ElevatorHeight;
@@ -33,6 +40,8 @@ public class RobotContainer {
   private final Elevator elevatorSubsystem;
   private final Index indexSubsystem;
   private final Pivot pivotSubsystem;
+
+  boolean toggleTrue = false;
 
   public RobotContainer() {
     driveController = new XboxController(controllerPorts.driveController);
@@ -55,36 +64,60 @@ public class RobotContainer {
                 driveSubsystem));
   }
 
+  public Command switchPivot(){
+    if(pivotSubsystem.getPosition() != PivotPosition.ALGAE){
+      return new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.ALGAE));
+    }else{
+      return new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.CORALINTAKE));
+    }
+  }
+
+  public Command changeElevator(ElevatorHeight height){
+    if(pivotSubsystem.getPosition() != PivotPosition.ALGAE){
+      return new SequentialCommandGroup(
+        new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.CORALSCORE)),
+        new WaitCommand(0.15),
+        new InstantCommand(() -> elevatorSubsystem.switchElevator(height)));
+    }else{
+      return new InstantCommand(() -> elevatorSubsystem.switchElevator(height));
+    }
+  }
+
+  public Command changeElevatorIntake(){
+    if(pivotSubsystem.getPosition() != PivotPosition.ALGAE){
+      return new SequentialCommandGroup(
+        new InstantCommand(() -> this.pivotSubsystem.switchPivot(PivotPosition.CORALSCORE)),
+        new WaitCommand(0.15),
+        new InstantCommand(() -> this.elevatorSubsystem.switchElevator(ElevatorHeight.INTAKE)),
+        new WaitCommand(0.2),
+        new InstantCommand(() -> this.pivotSubsystem.switchPivot(PivotPosition.CORALINTAKE)));
+    }else{
+      return new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.INTAKE));
+    }
+  }
+
   private void configureBindings() {
     new Trigger(() -> operatorController.getAButton())
-      .onTrue(pivotSubsystem.getPosition() != PivotPosition.ALGAE ?
-        new SequentialCommandGroup(
-            new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.CORALSCORE)),
-            new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.INTAKE)),
-            new WaitCommand(0.1),
-            new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.CORALINTAKE))
-        ) : new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.INTAKE)));
+      .onTrue(new SequentialCommandGroup(
+        new safeElevator(pivotSubsystem, elevatorSubsystem),
+        new WaitCommand(0.2),
+        new moveElevator(elevatorSubsystem, ElevatorHeight.INTAKE),
+        new WaitCommand(0.2),
+        new switchCoralIntake(pivotSubsystem)
+      ));
 
     new Trigger(() -> operatorController.getBButton())
-      .onTrue(pivotSubsystem.getPosition() != PivotPosition.ALGAE ?
-        new SequentialCommandGroup(
-            new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.CORALSCORE)),
-            new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.LEVELTWO))
-        ) : new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.LEVELTWO)));
+      .onTrue(new SequentialCommandGroup(
+        new safeElevator(pivotSubsystem, elevatorSubsystem),
+        new WaitCommand(0.2),
+        new moveElevator(elevatorSubsystem, ElevatorHeight.LEVELTWO)
+      ));
 
     new Trigger(() -> operatorController.getYButton())
-      .onTrue(pivotSubsystem.getPosition() != PivotPosition.ALGAE ?
-        new SequentialCommandGroup(
-            new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.CORALSCORE)),
-            new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.LEVELTHREE))
-        ) : new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.LEVELTHREE)));
+      .onTrue(this.changeElevator(ElevatorHeight.LEVELTHREE));
     
     new Trigger(() -> operatorController.getXButton())
-      .onTrue(pivotSubsystem.getPosition() != PivotPosition.ALGAE ?
-        new SequentialCommandGroup(
-            new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.CORALSCORE)),
-            new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.LEVELFOUR))
-        ) : new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.LEVELFOUR)));
+      .onTrue(this.changeElevator(ElevatorHeight.LEVELFOUR));
 
     new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.2)
       .whileTrue(new IntakeCoral(indexSubsystem, pivotSubsystem));
@@ -93,11 +126,9 @@ public class RobotContainer {
       .whileTrue(new OuttakeCoral(indexSubsystem, pivotSubsystem));
 
     new Trigger(() -> operatorController.getRightBumperButton())
-      .onTrue(pivotSubsystem.getPosition() != PivotPosition.ALGAE ?
-        new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.ALGAE))
-        : new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.CORALINTAKE)));
+      .onTrue(new switchPivot(pivotSubsystem));
 
-    new Trigger(() -> driveController.getRightTriggerAxis() > 0.25)
+    new Trigger(() -> driveController.getRightBumperButton())
       .whileTrue(new InstantCommand(() -> driveSubsystem.setX()));
   }
 

@@ -6,9 +6,12 @@ package frc.robot.Subsystems;
 
 import com.ctre.phoenix6.hardware.CANrange;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.indexConstants;
 import frc.robot.Constants.motorPorts;
@@ -21,7 +24,9 @@ public class Index extends SubsystemBase {
   public Index() {
     indexMotor = new SparkMax(motorPorts.indexMotor, MotorType.kBrushless);
     SparkMaxConfig config = new SparkMaxConfig();
+    config.inverted(true);
     config.smartCurrentLimit(indexConstants.currentLimit);
+    indexMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     
     sensor = new CANrange(motorPorts.photoEye);
   }
@@ -42,5 +47,6 @@ public class Index extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Sensor Distance", sensor.getDistance().getValueAsDouble());
   }
 }

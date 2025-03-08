@@ -17,6 +17,7 @@ public class OuttakeCoral extends Command {
   public OuttakeCoral(Index indexSubsystem, Pivot pivotSubsystem) {
     addRequirements(indexSubsystem, pivotSubsystem);
     this.indexSubsystem = indexSubsystem;
+    this.pivotSubsystem = pivotSubsystem;
   }
 
   // Called when the command is initially scheduled.
@@ -27,7 +28,7 @@ public class OuttakeCoral extends Command {
   @Override
   public void execute() {
     if(pivotSubsystem.getPosition() != PivotPosition.ALGAE){
-      indexSubsystem.runMotor(false);
+      indexSubsystem.runMotor(true);
     }else{
       indexSubsystem.runMotor(true);
     }
