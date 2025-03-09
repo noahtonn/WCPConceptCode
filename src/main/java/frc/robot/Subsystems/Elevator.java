@@ -5,10 +5,13 @@
 package frc.robot.Subsystems;
 
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,21 +27,29 @@ public class Elevator extends SubsystemBase {
   PIDController elevatorPID;
   double targetPosition;
   ElevatorHeight position;
+  SparkClosedLoopController elevatorController;
 
   public Elevator() {
     frontElevatorMotor = new SparkFlex(motorPorts.frontElevatorMotor, MotorType.kBrushless);
     backElevatorMotor = new SparkFlex(motorPorts.backElevatorMotor, MotorType.kBrushless);
     
 
-    SparkMaxConfig sConfig = new SparkMaxConfig();
-    sConfig.smartCurrentLimit(60);
-    frontElevatorMotor.configure(sConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    sConfig.follow(motorPorts.frontElevatorMotor);
-    backElevatorMotor.configure(sConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    SparkMaxConfig config = new SparkMaxConfig();
+    config.smartCurrentLimit(60);
+    config.closedLoopRampRate(0.5);
 
-    elevatorPID = new PIDController(elevatorConstants.p, elevatorConstants.i, elevatorConstants.d);
-    elevatorPID.setTolerance(elevatorConstants.elevatorTolerance);
+    config.closedLoop
+      .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+      .pid(elevatorConstants.p, elevatorConstants.i, elevatorConstants.d)
+      .velocityFF(0.001)
+      .outputRange(-1, 1);
 
+    frontElevatorMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+    config.follow(motorPorts.frontElevatorMotor);
+    backElevatorMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+    elevatorController = frontElevatorMotor.getClosedLoopController();
+    
     switchElevator(ElevatorHeight.INTAKE);
   } 
 
@@ -50,26 +61,24 @@ public class Elevator extends SubsystemBase {
     this.position = position;
     switch (position) {
       case INTAKE:
-        targetPosition = elevatorConstants.intake;
+        elevatorController.setReference(elevatorConstants.intake, ControlType.kPosition);
         break;
       case LEVELTWO:
-        targetPosition = elevatorConstants.levelTwo;
+      elevatorController.setReference(elevatorConstants.levelTwo, ControlType.kPosition);
         break;
       case LEVELTHREE:
-        targetPosition = elevatorConstants.levelThree;
+      elevatorController.setReference(elevatorConstants.levelThree, ControlType.kPosition);
         break;
       case LEVELFOUR:
-        targetPosition = elevatorConstants.levelFour;
+      elevatorController.setReference(elevatorConstants.levelFour, ControlType.kPosition);
         break;
       default:
-        targetPosition = elevatorConstants.intake;
+        elevatorController.setReference(elevatorConstants.intake, ControlType.kPosition);
     }
   }
   @Override
   public void periodic() {
-    double input = elevatorPID.calculate(frontElevatorMotor.getEncoder().getPosition(), targetPosition);
-    input = input >= 1 ? 1 : input;
-    SmartDashboard.putNumber("Elevator Power", input);
-    frontElevatorMotor.set(input);
+    SmartDashboard.putString("Elevator Target", position.toString());
+    SmartDashboard.putNumber("Applied Output", frontElevatorMotor.getAppliedOutput());
   }
 }

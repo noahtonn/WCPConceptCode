@@ -23,8 +23,8 @@ public class Constants {
 
     public static class elevatorConstants {
         //PID Values
-        public static final double p = 1;
-        public static final double i = 0.0;
+        public static final double p = 0.3;
+        public static final double i = 0;
         public static final double d = 0;
 
         //Elevator encoder positions
@@ -47,9 +47,9 @@ public class Constants {
 
     public static class pivotConstants {
         //PID Values
-        public static final double p = 1.2;
-        public static final double i = 0.2;
-        public static final double d = 0.1;
+        public static final double p = 1;
+        public static final double i = 0;
+        public static final double d = 0;
 
         public static final double algae = 0.027;
         public static final double coralscore = 0.425;

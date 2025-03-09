@@ -5,10 +5,13 @@
 package frc.robot.Subsystems;
 
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -18,54 +21,59 @@ import frc.robot.Constants.pivotConstants;
 import frc.robot.Constants.pivotConstants.PivotPosition;
 
 public class Pivot extends SubsystemBase {
-
-  double pivotPosition;
   SparkMax pivotMotor;
   PIDController pivotPID;
-  PivotPosition Sposition;
+  PivotPosition position;
+  SparkClosedLoopController pivotController;
   
   public Pivot() {
     pivotMotor = new SparkMax(motorPorts.pivotMotor, MotorType.kBrushless);
     SparkMaxConfig config = new SparkMaxConfig();
     config.smartCurrentLimit(pivotConstants.currentLimit);
     config.inverted(true);
+    config.closedLoop
+      .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+      .pid(pivotConstants.p, pivotConstants.i, pivotConstants.d)
+      .velocityFF(0.001)
+      .outputRange(-1, 1);
+    
     pivotMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     
-    pivotPID = new PIDController(pivotConstants.p, pivotConstants.i, pivotConstants.d);
+    pivotController = pivotMotor.getClosedLoopController();
     switchPivot(PivotPosition.CORALINTAKE);
   }
 
   public void switchPivot(PivotPosition position){
-    Sposition = position;
+    this.position = position;
     switch(position){
       case ALGAE:
-        pivotPosition = pivotConstants.algae;
+        pivotController.setReference(pivotConstants.algae, ControlType.kPosition);
         break;
 
       case CORALSCORE:
-        pivotPosition = pivotConstants.coralscore;
+      pivotController.setReference(pivotConstants.coralscore, ControlType.kPosition);
         break;
         
       case CLIMB:
-        pivotPosition = pivotConstants.climb;
+      pivotController.setReference(pivotConstants.climb, ControlType.kPosition);
         break;
       
       case CORALINTAKE:
-        pivotPosition = pivotConstants.coralintake;
+      pivotController.setReference(pivotConstants.coralintake, ControlType.kPosition);
         break;
 
       default:
-        pivotPosition = pivotConstants.coralintake;
+      pivotController.setReference(pivotConstants.coralintake, ControlType.kPosition);
     }
   }
 
   public PivotPosition getPosition(){
-    return Sposition;
+    return position;
   }
 
   @Override
   public void periodic() {
-    pivotMotor.set(pivotPID.calculate(pivotMotor.getAbsoluteEncoder().getPosition(), pivotPosition));
-    SmartDashboard.putString("PivotPosition", getPosition().toString());
+    SmartDashboard.putString("Pivot Position", position.toString());
+    SmartDashboard.putNumber("Pivot Applied Power", pivotMotor.getAppliedOutput());
   }
 }
