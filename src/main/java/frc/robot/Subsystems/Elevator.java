@@ -12,6 +12,7 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -37,17 +38,16 @@ public class Elevator extends SubsystemBase {
     SparkMaxConfig config = new SparkMaxConfig();
     config.smartCurrentLimit(60);
     config.closedLoopRampRate(0.5);
-
+    config.idleMode(IdleMode.kBrake);
     config.closedLoop
       .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       .pid(elevatorConstants.p, elevatorConstants.i, elevatorConstants.d)
-      .velocityFF(0.001)
+      .velocityFF(0.018)
       .outputRange(-1, 1);
 
     frontElevatorMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
     config.follow(motorPorts.frontElevatorMotor);
     backElevatorMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-
     elevatorController = frontElevatorMotor.getClosedLoopController();
     
     switchElevator(ElevatorHeight.INTAKE);
@@ -64,13 +64,13 @@ public class Elevator extends SubsystemBase {
         elevatorController.setReference(elevatorConstants.intake, ControlType.kPosition);
         break;
       case LEVELTWO:
-      elevatorController.setReference(elevatorConstants.levelTwo, ControlType.kPosition);
+        elevatorController.setReference(elevatorConstants.levelTwo, ControlType.kPosition);
         break;
       case LEVELTHREE:
-      elevatorController.setReference(elevatorConstants.levelThree, ControlType.kPosition);
+        elevatorController.setReference(elevatorConstants.levelThree, ControlType.kPosition);
         break;
       case LEVELFOUR:
-      elevatorController.setReference(elevatorConstants.levelFour, ControlType.kPosition);
+        elevatorController.setReference(elevatorConstants.levelFour, ControlType.kPosition);
         break;
       default:
         elevatorController.setReference(elevatorConstants.intake, ControlType.kPosition);

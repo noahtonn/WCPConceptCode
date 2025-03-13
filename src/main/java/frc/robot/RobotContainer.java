@@ -4,11 +4,8 @@
 
 package frc.robot;
 
-import java.time.Instant;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -69,7 +66,7 @@ public class RobotContainer {
             new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.CORALSCORE)),
             new WaitCommand(0.2),
             new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.INTAKE)),
-            new WaitCommand(0.2),
+            new WaitCommand(0.25),
             new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.CORALINTAKE))), 
 
             new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.INTAKE)), //If false
@@ -100,17 +97,17 @@ public class RobotContainer {
         
         () -> pivotSubsystem.getPosition() != PivotPosition.ALGAE)); //Condition
     
-    new Trigger(() -> operatorController.getXButton())
-    .onTrue(
-      new ConditionalCommand( 
-        new SequentialCommandGroup( //If true
-          new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.CORALSCORE)),
-          new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.LEVELFOUR))
-        ), 
+    // new Trigger(() -> operatorController.getXButton())
+    // .onTrue(
+    //   new ConditionalCommand( 
+    //     new SequentialCommandGroup( //If true
+    //       new InstantCommand(() -> pivotSubsystem.switchPivot(PivotPosition.CORALSCORE)),
+    //       new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.LEVELFOUR))
+    //     ), 
         
-        new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.LEVELFOUR)), //If false
+    //     new InstantCommand(() -> elevatorSubsystem.switchElevator(ElevatorHeight.LEVELFOUR)), //If false
         
-        () -> pivotSubsystem.getPosition() != PivotPosition.ALGAE)); //Condition
+    //     () -> pivotSubsystem.getPosition() != PivotPosition.ALGAE)); //Condition
 
     new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.2)
       .whileTrue(new IntakeCoral(indexSubsystem, pivotSubsystem));

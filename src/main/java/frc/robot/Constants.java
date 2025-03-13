@@ -23,19 +23,22 @@ public class Constants {
 
     public static class elevatorConstants {
         //PID Values
-        public static final double p = 0.3;
+        public static final double p = 0.0175;
         public static final double i = 0;
-        public static final double d = 0;
+        public static final double d = 0.01;
 
         //Elevator encoder positions
-        public static final double intake = 0;
-        public static final double levelTwo = 4.315;
-        public static final double levelThree = 10.315;
+        public static final double intake = 0.05;
+        public static final double levelTwo = 4.35;
+        
+
+         
+        public static final double levelThree = 7.8;
         public static final double levelFour = 21.4;
 
-        public static final int currentLimit = 40;
+        public static final int currentLimit = 10;
         
-        public static final double elevatorTolerance = 0.4; //5 ticks should be pretty small I think
+        public static final double elevatorTolerance = 0.1; //5 ticks should be pretty small I think
 
         public static enum ElevatorHeight {
             INTAKE,
@@ -47,18 +50,19 @@ public class Constants {
 
     public static class pivotConstants {
         //PID Values
-        public static final double p = 1;
+        public static final double p = 0.9;
         public static final double i = 0;
         public static final double d = 0;
 
-        public static final double algae = 0.027;
-        public static final double coralscore = 0.425;
+        public static final double algae = 0.1;
+        public static final double coralscore = 0.4;
         public static final double coralintake = 0.516;
         public static final double climb = 0;
 
         public static final int currentLimit = 40;
 
         public static enum PivotPosition {
+
             ALGAE,
             CORALSCORE,
             CORALINTAKE,
@@ -67,7 +71,7 @@ public class Constants {
     }
 
     public class indexConstants {
-        public static final double indexSpeed = 0.3;
+        public static final double indexSpeed = 0.25;
         public static final int currentLimit = 40;
         public static final double distanceTolerance = 0.1;
     }
