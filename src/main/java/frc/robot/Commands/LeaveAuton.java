@@ -13,6 +13,7 @@ public class LeaveAuton extends Command {
   /** Creates a new LeaveAuton. */
   DriveSubsystem driveSubsystem;
   Timer driveTimer;
+  double time = 5;
   public LeaveAuton(DriveSubsystem driveSubsystem) {
     addRequirements(driveSubsystem);
     this.driveSubsystem = driveSubsystem;
@@ -29,7 +30,7 @@ public class LeaveAuton extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    while(driveTimer.hasElapsed(5)){
+    while(driveTimer.get() > time){
       driveSubsystem.drive(0, 0.15, 0, true);
     }
   }
@@ -43,6 +44,6 @@ public class LeaveAuton extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return driveTimer.hasElapsed(5);
+    return driveTimer.get() > 5;
   }
 }
