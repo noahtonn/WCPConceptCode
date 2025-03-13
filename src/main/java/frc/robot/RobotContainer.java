@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.robot.Commands.IntakeCoral;
+import frc.robot.Commands.LeaveAuton;
 import frc.robot.Commands.OuttakeCoral;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.controllerPorts;
@@ -35,6 +36,8 @@ public class RobotContainer {
   private final Index indexSubsystem;
   private final Pivot pivotSubsystem;
 
+  private final LeaveAuton leaveAuton;
+
   boolean toggleTrue = false;
 
   public RobotContainer() {
@@ -44,6 +47,7 @@ public class RobotContainer {
     elevatorSubsystem = new Elevator();
     indexSubsystem = new Index();
     pivotSubsystem = new Pivot();
+    leaveAuton = new LeaveAuton(driveSubsystem);
     configureBindings();
 
     driveSubsystem.setDefaultCommand(
@@ -128,6 +132,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return leaveAuton;
   }
 }
